@@ -12,7 +12,7 @@ const Track = () => {
   useEffect(() => {
     refreshOrders();
     checkDailySync();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshOrders = async () => {
     const result = await db.allDocs({ include_docs: true });
