@@ -96,6 +96,16 @@ const OrderDetail = () => {
                     </div>
 
                     <div className="input-group">
+                        <label className="input-label">Notes</label>
+                        <textarea
+                            value={editForm.notes || ''}
+                            onChange={e => setEditForm({ ...editForm, notes: e.target.value })}
+                            placeholder="Add any additional notes..."
+                            style={{ minHeight: '80px', fontFamily: 'inherit' }}
+                        />
+                    </div>
+
+                    <div className="input-group">
                         <label className="input-label">Order Type</label>
                         <select value={editForm.orderType || 'Bag'} onChange={e => setEditForm({ ...editForm, orderType: e.target.value, selectedElements: [] })}>
                             <option value="Bag">Bag</option>
@@ -188,6 +198,11 @@ const OrderDetail = () => {
                         <div style={{ marginBottom: '20px' }}>
                             <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Delivery Address</p>
                             <p style={{ fontSize: '1rem', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{order.deliveryAddress || 'Not provided'}</p>
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Notes</p>
+                            <p style={{ fontSize: '1rem', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{order.notes || 'No notes'}</p>
                         </div>
 
                         <hr style={{ margin: '20px 0', border: 'none', borderTop: '1px solid #eee' }} />

@@ -14,7 +14,8 @@ const defaultForm = {
   status: 'Processing',
   source: 'Instagram',
   orderType: 'Bag',
-  selectedElements: []
+  selectedElements: [],
+  notes: ''
 };
 
 // Initialize Speech Recognition
@@ -194,6 +195,17 @@ const Order = () => {
         <label className="input-label">Delivery Charge (₹)</label>
         <input type="number" value={form.delivery_charge} onChange={e => setForm({...form, delivery_charge: e.target.value})} />
       </div>
+
+      <div className="input-group">
+        <label className="input-label">Notes</label>
+        <textarea
+          value={form.notes}
+          onChange={e => setForm({...form, notes: e.target.value})}
+          placeholder="Add any additional notes..."
+          style={{ minHeight: '80px', fontFamily: 'inherit' }}
+        />
+      </div>
+
         <button type="submit" className="btn-primary">Save Order</button>
       </form>
     </main>
