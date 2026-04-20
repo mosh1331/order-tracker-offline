@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PouchDB from 'pouchdb';
 
@@ -14,9 +14,53 @@ const defaultForm = {
   source: 'Instagram'
 };
 
+// Initialize Speech Recognition
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
 const Order = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState(defaultForm);
+  const [isListening, setIsListening] = useState(false);
+
+  const startListening = () => {
+    if (!recognition) {
+      alert("Voice recognition not supported in this browser.");
+      return;
+    }
+    setIsListening(true);
+    recognition.start();
+  };
+
+  if (recognition) {
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript.toLowerCase();
+      setIsListening(false);
+      parseVoiceCommand(transcript);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+  }
+
+  // Simple Parsing Logic
+  const parseVoiceCommand = (text) => {
+    const updatedForm = { ...form };
+
+    // Regex patterns for better matching
+    const nameMatch = text.match(/name (?:is )?([a-z\s]+)(?= price| cost| phone| status|$)/);
+    const priceMatch = text.match(/price (?:is )?(\d+)/);
+    const costMatch = text.match(/cost (?:is )?(\d+)/);
+    const phoneMatch = text.match(/phone (?:is )?(\d+)/);
+    const statusMatch = text.match(/(processing|shipped|delivered)/);
+
+    if (nameMatch) updatedForm.customerName = nameMatch[1].trim();
+    if (priceMatch) updatedForm.price = priceMatch[1];
+    if (costMatch) updatedForm.cost = costMatch[1];
+    if (phoneMatch) updatedForm.phoneNumber = phoneMatch[1];
+    if (statusMatch) updatedForm.status = statusMatch[0].charAt(0).toUpperCase() + statusMatch[0].slice(1);
+
+    setForm(updatedForm);
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -26,7 +70,6 @@ const Order = () => {
       timestamp: Date.now(),
       date: new Date().toLocaleDateString()
     };
-    console.log('Saving order', newOrder);
     await db.put(newOrder);
     setForm(defaultForm);
     navigate('/track');
@@ -34,7 +77,23 @@ const Order = () => {
 
   return (
     <main className="card animate-in">
-      <h2 style={{marginTop: 0}}>Create Order</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2 style={{ margin: 0 }}>Create Order</h2>
+        <button 
+          type="button" 
+          onClick={startListening}
+          className={`voice-btn ${isListening ? 'listening' : ''}`}
+          style={{
+            background: isListening ? '#ef4444' : '#4f46e5',
+            color: 'white', border: 'none', borderRadius: '50%', width: '45px', height: '45px', cursor: 'pointer'
+          }}
+        >
+          {isListening ? '...' : '🎙️'}
+        </button>
+      </div>
+
+      {isListening && <p className="voice-hint">Say: "Name [X] price [Y] cost [Z]"</p>}
+
       <form onSubmit={handleSave}>
         <div className="input-group">
           <label className="input-label">Customer Name</label>
