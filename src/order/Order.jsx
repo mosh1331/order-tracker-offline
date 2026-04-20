@@ -9,7 +9,7 @@ const defaultForm = {
   deliveryAddress: '',
   price: '',
   cost: '',
-  delivery_charge: '',
+  delivery_charge: 70,
   status: 'Processing',
   source: 'Instagram'
 };
@@ -75,6 +75,8 @@ const Order = () => {
     navigate('/track');
   };
 
+  console.log(form,'form.delivery_charge')
+
   return (
     <main className="card animate-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -119,6 +121,10 @@ const Order = () => {
             <label className="input-label">Cost (₹)</label>
             <input type="number" value={form.cost} onChange={e => setForm({...form, cost: e.target.value})} required />
           </div>
+        </div>
+        <div className="input-group">
+          <label className="input-label">Delivery Charge (₹)</label>
+          <input type="number" value={form.delivery_charge} onChange={e => setForm({...form, delivery_charge: e.target.value})} />
         </div>
 
         <div className="input-group">
