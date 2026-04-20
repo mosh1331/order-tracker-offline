@@ -26,6 +26,12 @@ const Landing = () => {
               ☵ Track Orders
             </button>
           </Link>
+
+          <Link to="/analytics" style={{ textDecoration: 'none' }}>
+            <button className="btn-primary" style={{ width: '100%', padding: '12px 24px', fontSize: '1rem', cursor: 'pointer' }}>
+              📊 View Analytics
+            </button>
+          </Link>
         </div>
       </main>
     </div>
