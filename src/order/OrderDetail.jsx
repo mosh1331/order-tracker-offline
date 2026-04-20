@@ -13,7 +13,7 @@ const OrderDetail = () => {
 
   useEffect(() => {
     loadOrder();
-  }, [orderId]); // eslint-disable-line react-hooks/exhaustive-deps // eslint-disable-line react-hooks/exhaustive-deps
+  }, [orderId]); 
 
   const loadOrder = async () => {
     try {
