@@ -10,6 +10,7 @@ const OrderDetail = () => {
     const [order, setOrder] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState({});
+    const [confirmDelete, setConfirmDelete] = useState(false);
 
     const loadOrder = async () => {
         try {
@@ -36,13 +37,11 @@ const OrderDetail = () => {
     };
 
     const handleDelete = async () => {
-        if (window.confirm('Are you sure you want to delete this order?')) {
-            try {
-                await db.remove(order);
-                navigate('/track');
-            } catch (e) {
-                console.error('Error deleting order', e);
-            }
+        try {
+            await db.remove(order);
+            navigate('/track');
+        } catch (e) {
+            console.error('Error deleting order', e);
         }
     };
 
@@ -153,9 +152,58 @@ const OrderDetail = () => {
 
                         <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                             <button onClick={() => setIsEditing(true)} className="btn-primary" style={{ flex: 1 }}>Edit</button>
-                            <button onClick={handleDelete} className="btn-primary" style={{ flex: 1, background: '#dc3545' }}>Delete</button>
+                            <button onClick={() => setConfirmDelete(true)} className="btn-primary" style={{ flex: 1, background: '#dc3545' }}>Delete</button>
                         </div>
                     </div>
+
+                    {confirmDelete && (
+                        <div style={{
+                            position: 'fixed',
+                            inset: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '20px',
+                            zIndex: 50
+                        }}>
+                            <div style={{
+                                width: '100%',
+                                maxWidth: '420px',
+                                background: '#fff',
+                                borderRadius: '16px',
+                                boxShadow: '0 16px 40px rgba(0,0,0,0.12)',
+                                padding: '24px',
+                                textAlign: 'center'
+                            }}>
+                                <h3 style={{ margin: '0 0 12px', fontSize: '1.2rem' }}>Confirm Delete</h3>
+                                <p style={{ color: '#555', marginBottom: '24px' }}>
+                                    Are you sure you want to remove this order? This action cannot be undone.
+                                </p>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setConfirmDelete(false)}
+                                        className="btn-primary"
+                                        style={{ flex: 1, background: '#999' }}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            await handleDelete();
+                                            setConfirmDelete(false);
+                                        }}
+                                        className="btn-primary"
+                                        style={{ flex: 1, background: '#dc3545' }}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
         </main>

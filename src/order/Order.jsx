@@ -102,7 +102,7 @@ const Order = () => {
           <input value={form.customerName} onChange={e => setForm({...form, customerName: e.target.value})} required />
         </div>
 
-        <div className="input-group">
+        {/* <div className="input-group">
           <label className="input-label">Phone Number</label>
           <input type="tel" value={form.phoneNumber} onChange={e => setForm({...form, phoneNumber: e.target.value})}  />
         </div>
@@ -110,7 +110,7 @@ const Order = () => {
         <div className="input-group">
           <label className="input-label">Delivery Address</label>
           <textarea value={form.deliveryAddress} onChange={e => setForm({...form, deliveryAddress: e.target.value})}  style={{minHeight: '80px', fontFamily: 'inherit'}} />
-        </div>
+        </div> */}
 
         <div style={{display: 'flex', gap: '12px'}}>
           <div className="input-group" style={{flex: 1}}>
@@ -127,14 +127,14 @@ const Order = () => {
           <input type="number" value={form.delivery_charge} onChange={e => setForm({...form, delivery_charge: e.target.value})} />
         </div>
 
-        <div className="input-group">
+        {/* <div className="input-group">
           <label className="input-label">Status</label>
           <select value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
             <option value="Processing">Processing</option>
             <option value="Shipped">Shipped</option>
             <option value="Delivered">Delivered</option>
           </select>
-        </div>
+        </div> */}
 
         <button type="submit" className="btn-primary">Save Order</button>
       </form>
