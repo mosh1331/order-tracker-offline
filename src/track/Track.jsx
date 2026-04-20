@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PouchDB from 'pouchdb';
 import * as XLSX from 'xlsx';
 
 const db = new PouchDB('tote_sales');
 
 const Track = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ const Track = () => {
         <button onClick={handleExport} className="badge badge-shipped" style={{border: 'none', cursor: 'pointer'}}>Export Excel</button>
       </div>
       {orders.map(order => (
-        <div key={order._id} className="order-card">
+        <div key={order._id} className="order-card" onClick={() => navigate(`/order/${order._id}`)} style={{cursor: 'pointer'}}>
           <div className="order-header">
             <div>
               <p className="customer-name">{order.customerName}</p>

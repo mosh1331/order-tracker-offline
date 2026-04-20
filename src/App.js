@@ -3,12 +3,12 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { Link } from 'react-router-dom';
 import Landing from './landing/Landing';
 import Order from './order/Order';
+import OrderDetail from './order/OrderDetail';
 import Track from './track/Track';
 
 function Navigation() {
   const location = useLocation();
-  
-  // Don't show nav on landing page
+  if (location.pathname === '/' || location.pathname.startsWith('/order/'))
   if (location.pathname === '/') {
     return null;
   }
@@ -50,6 +50,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/new-order" element={<PageWrapper><Order /></PageWrapper>} />
           <Route path="/track" element={<PageWrapper><Track /></PageWrapper>} />
+          <Route path="/order/:orderId" element={<PageWrapper><OrderDetail /></PageWrapper>} />
         </Routes>
         <Navigation />
       </div>

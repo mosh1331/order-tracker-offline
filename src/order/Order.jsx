@@ -4,7 +4,14 @@ import PouchDB from 'pouchdb';
 
 const db = new PouchDB('tote_sales');
 const defaultForm = {
-  customerName: '', price: '', cost: '', delivery_charge:'', status: 'Processing', source: 'Instagram'
+  customerName: '',
+  phoneNumber: '',
+  deliveryAddress: '',
+  price: '',
+  cost: '',
+  delivery_charge: '',
+  status: 'Processing',
+  source: 'Instagram'
 };
 
 const Order = () => {
@@ -19,8 +26,9 @@ const Order = () => {
       timestamp: Date.now(),
       date: new Date().toLocaleDateString()
     };
+    console.log('Saving order', newOrder);
     await db.put(newOrder);
-    setForm();
+    setForm(defaultForm);
     navigate('/track');
   };
 
@@ -31,6 +39,16 @@ const Order = () => {
         <div className="input-group">
           <label className="input-label">Customer Name</label>
           <input value={form.customerName} onChange={e => setForm({...form, customerName: e.target.value})} required />
+        </div>
+
+        <div className="input-group">
+          <label className="input-label">Phone Number</label>
+          <input type="tel" value={form.phoneNumber} onChange={e => setForm({...form, phoneNumber: e.target.value})}  />
+        </div>
+
+        <div className="input-group">
+          <label className="input-label">Delivery Address</label>
+          <textarea value={form.deliveryAddress} onChange={e => setForm({...form, deliveryAddress: e.target.value})}  style={{minHeight: '80px', fontFamily: 'inherit'}} />
         </div>
 
         <div style={{display: 'flex', gap: '12px'}}>
