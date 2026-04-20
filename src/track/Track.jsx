@@ -42,7 +42,7 @@ const Track = () => {
   useEffect(() => {
     refreshOrders();
     checkDailySync();
-  }, [checkDailySync]);
+  }, []);
 
 
   return (

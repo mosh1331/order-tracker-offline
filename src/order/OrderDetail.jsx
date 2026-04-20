@@ -21,9 +21,6 @@ const OrderDetail = () => {
         }
     };
 
-
-
-
     const handleSaveChanges = async (e) => {
         e.preventDefault();
         try {
@@ -51,7 +48,7 @@ const OrderDetail = () => {
 
     useEffect(() => {
         loadOrder();
-    }, [orderId, loadOrder]);
+    }, [orderId]);
 
     
 
