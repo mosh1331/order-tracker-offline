@@ -13,7 +13,7 @@ const OrderDetail = () => {
 
   useEffect(() => {
     loadOrder();
-  }, [orderId]); 
+  }, [orderId,loadOrder]); 
 
   const loadOrder = async () => {
     try {

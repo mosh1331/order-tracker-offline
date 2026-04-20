@@ -12,7 +12,7 @@ const Track = () => {
   useEffect(() => {
     refreshOrders();
     checkDailySync();
-  }, []); 
+  }, [checkDailySync]); 
 
   const refreshOrders = async () => {
     const result = await db.allDocs({ include_docs: true });
