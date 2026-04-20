@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PouchDB from 'pouchdb';
+import { bagOptions, pouchOptions } from '../helper/Data';
 
 const db = new PouchDB('tote_sales');
 
@@ -11,12 +12,22 @@ const OrderDetail = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState({});
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const elementOptions = (editForm.orderType || 'Bag') === 'Bag' ? bagOptions : pouchOptions;
+    const selectedElementsCost = (editForm.selectedElements || []).reduce((sum, key) => {
+        const option = elementOptions.find(item => item.key === key);
+        return sum + (option?.price || 0);
+    }, 0);
+    const totalCost = (parseFloat(editForm.baseCost) || 0) + selectedElementsCost;
 
     const loadOrder = async () => {
         try {
             const doc = await db.get(orderId);
-            setOrder(doc);
-            setEditForm(doc);
+            const loadedDoc = {
+                ...doc,
+                baseCost: doc.baseCost != null ? doc.baseCost : doc.cost || ''
+            };
+            setOrder(loadedDoc);
+            setEditForm(loadedDoc);
         } catch (e) {
             console.error('Order not found');
         }
@@ -27,9 +38,10 @@ const OrderDetail = () => {
         try {
             await db.put({
                 ...editForm,
+                cost: totalCost,
                 _rev: order._rev
             });
-            setOrder(editForm);
+            setOrder({ ...editForm, cost: totalCost });
             setIsEditing(false);
         } catch (e) {
             console.error('Error saving order', e);
@@ -81,6 +93,69 @@ const OrderDetail = () => {
                     <div className="input-group">
                         <label className="input-label">Delivery Address</label>
                         <textarea value={editForm.deliveryAddress || ''} onChange={e => setEditForm({ ...editForm, deliveryAddress: e.target.value })} style={{ minHeight: '80px', fontFamily: 'inherit' }} />
+                    </div>
+
+                    <div className="input-group">
+                        <label className="input-label">Order Type</label>
+                        <select value={editForm.orderType || 'Bag'} onChange={e => setEditForm({ ...editForm, orderType: e.target.value, selectedElements: [] })}>
+                            <option value="Bag">Bag</option>
+                            <option value="Pouch">Pouch</option>
+                        </select>
+                    </div>
+
+                    <div className="input-group">
+                        <label className="input-label">Base Cost (₹)</label>
+                        <input
+                            type="number"
+                            value={editForm.baseCost || ''}
+                            onChange={e => setEditForm({ ...editForm, baseCost: e.target.value })}
+                            required
+                        />
+                    </div>
+
+                    <div className="input-group">
+                        <label className="input-label">Order Elements</label>
+                        <select
+                            multiple
+                            value={editForm.selectedElements || []}
+                            onChange={e => {
+                                const selected = Array.from(e.target.selectedOptions, option => option.value);
+                                setEditForm({ ...editForm, selectedElements: selected });
+                            }}
+                            style={{ width: '100%', minHeight: '140px', borderRadius: '10px', padding: '10px' }}
+                        >
+                            {elementOptions.map(option => (
+                                <option key={option.key} value={option.key}>
+                                    {option.label} ({option.price ? `₹${option.price}` : 'No price'})
+                                </option>
+                            ))}
+                        </select>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                            {(editForm.selectedElements || []).length > 0 ? (
+                                (editForm.selectedElements || []).map(key => {
+                                    const option = elementOptions.find(item => item.key === key);
+                                    return (
+                                        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '999px', background: '#eef2ff' }}>
+                                            <span style={{ fontSize: '0.95rem' }}>{option?.label || key}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditForm({ ...editForm, selectedElements: (editForm.selectedElements || []).filter(item => item !== key) })}
+                                                style={{ border: 'none', background: 'transparent', color: '#333', cursor: 'pointer', fontSize: '1rem' }}
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <p style={{ margin: 0, color: '#666' }}>No elements selected yet.</p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="input-group">
+                        <label className="input-label">Total Cost (₹)</label>
+                        <input type="number" value={totalCost} readOnly style={{ backgroundColor: '#f8f9fa' }} />
                     </div>
 
                     <div className="input-group">
@@ -141,9 +216,37 @@ const OrderDetail = () => {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                             <div>
+                                <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Order Type</p>
+                                <p style={{ fontSize: '1rem' }}>{order.orderType || 'Bag'}</p>
+                            </div>
+                            <div>
                                 <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Source</p>
                                 <p style={{ fontSize: '1rem' }}>{order.source}</p>
                             </div>
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '8px' }}>Selected Elements</p>
+                            {order.selectedElements && order.selectedElements.length > 0 ? (
+                                <div style={{ display: 'grid', gap: '8px' }}>
+                                    {(order.selectedElements || []).map(key => {
+                                        const option = (order.orderType === 'Bag' ? bagOptions : pouchOptions).find(item => item.key === key);
+                                        return (
+                                            <div key={key} style={{ padding: '12px', borderRadius: '12px', background: '#f7f7f7' }}>
+                                                <strong>{option?.label || key}</strong>
+                                                {option?.price != null && (
+                                                    <span style={{ float: 'right', color: '#555' }}>₹{option.price}</span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <p style={{ color: '#666', margin: 0 }}>No elements selected.</p>
+                            )}
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                             <div>
                                 <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Date</p>
                                 <p style={{ fontSize: '1rem' }}>{order.date}</p>

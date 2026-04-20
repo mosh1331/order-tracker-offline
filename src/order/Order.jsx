@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PouchDB from 'pouchdb';
+import { bagOptions, pouchOptions } from '../helper/Data';
 
 const db = new PouchDB('tote_sales');
 const defaultForm = {
@@ -8,10 +9,12 @@ const defaultForm = {
   phoneNumber: '',
   deliveryAddress: '',
   price: '',
-  cost: '',
+  baseCost: '',
   delivery_charge: 70,
   status: 'Processing',
-  source: 'Instagram'
+  source: 'Instagram',
+  orderType: 'Bag',
+  selectedElements: []
 };
 
 // Initialize Speech Recognition
@@ -22,6 +25,13 @@ const Order = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState(defaultForm);
   const [isListening, setIsListening] = useState(false);
+
+  const elementOptions = form.orderType === 'Bag' ? bagOptions : pouchOptions;
+  const selectedElementsCost = form.selectedElements.reduce((sum, key) => {
+    const option = elementOptions.find(item => item.key === key);
+    return sum + (option?.price || 0);
+  }, 0);
+  const totalCost = (parseFloat(form.baseCost) || 0) + selectedElementsCost;
 
   const startListening = () => {
     if (!recognition) {
@@ -66,6 +76,8 @@ const Order = () => {
     e.preventDefault();
     const newOrder = {
       ...form,
+      baseCost: parseFloat(form.baseCost) || 0,
+      cost: totalCost,
       _id: `order_${Date.now()}`,
       timestamp: Date.now(),
       date: new Date().toLocaleDateString()
@@ -118,24 +130,70 @@ const Order = () => {
             <input type="number" value={form.price} onChange={e => setForm({...form, price: e.target.value})} required />
           </div>
           <div className="input-group" style={{flex: 1}}>
-            <label className="input-label">Cost (₹)</label>
-            <input type="number" value={form.cost} onChange={e => setForm({...form, cost: e.target.value})} required />
+            <label className="input-label">Base Cost (₹)</label>
+            <input type="number" value={form.baseCost} onChange={e => setForm({...form, baseCost: e.target.value})} required />
           </div>
         </div>
         <div className="input-group">
-          <label className="input-label">Delivery Charge (₹)</label>
-          <input type="number" value={form.delivery_charge} onChange={e => setForm({...form, delivery_charge: e.target.value})} />
+          <label className="input-label">Total Cost (₹)</label>
+          <input type="number" value={totalCost} readOnly style={{ backgroundColor: '#f8f9fa' }} />
         </div>
 
-        {/* <div className="input-group">
-          <label className="input-label">Status</label>
-          <select value={form.status} onChange={e => setForm({...form, status: e.target.value})}>
-            <option value="Processing">Processing</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Delivered">Delivered</option>
-          </select>
-        </div> */}
+      <div className="input-group">
+        <label className="input-label">Order Type</label>
+        <select
+          value={form.orderType}
+          onChange={e => setForm({ ...form, orderType: e.target.value, selectedElements: [] })}
+        >
+          <option value="Bag">Bag</option>
+          <option value="Pouch">Pouch</option>
+        </select>
+      </div>
 
+      <div className="input-group">
+        <label className="input-label">Order Elements</label>
+        <select
+          multiple
+          value={form.selectedElements}
+          onChange={e => {
+            const selected = Array.from(e.target.selectedOptions, option => option.value);
+            setForm({ ...form, selectedElements: selected });
+          }}
+          style={{ width: '100%', minHeight: '140px', borderRadius: '10px', padding: '10px' }}
+        >
+          {elementOptions.map(option => (
+            <option key={option.key} value={option.key}>
+              {option.label} ({option.price ? `₹${option.price}` : 'No price'})
+            </option>
+          ))}
+        </select>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+          {form.selectedElements.length > 0 ? (
+            form.selectedElements.map(key => {
+              const option = elementOptions.find(item => item.key === key);
+              return (
+                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '999px', background: '#eef2ff' }}>
+                  <span style={{ fontSize: '0.95rem' }}>{option?.label || key}</span>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, selectedElements: form.selectedElements.filter(item => item !== key) })}
+                    style={{ border: 'none', background: 'transparent', color: '#333', cursor: 'pointer', fontSize: '1rem' }}
+                  >
+                    ×
+                  </button>
+                </div>
+              );
+            })
+          ) : (
+            <p style={{ margin: 0, color: '#666' }}>No elements selected yet.</p>
+          )}
+        </div>
+      </div>
+
+      <div className="input-group">
+        <label className="input-label">Delivery Charge (₹)</label>
+        <input type="number" value={form.delivery_charge} onChange={e => setForm({...form, delivery_charge: e.target.value})} />
+      </div>
         <button type="submit" className="btn-primary">Save Order</button>
       </form>
     </main>
