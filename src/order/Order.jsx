@@ -66,7 +66,7 @@ const Order = () => {
 
     if (nameMatch) updatedForm.customerName = nameMatch[1].trim();
     if (priceMatch) updatedForm.price = priceMatch[1];
-    if (costMatch) updatedForm.cost = costMatch[1];
+    if (costMatch) updatedForm.baseCost = costMatch[1];
     if (phoneMatch) updatedForm.phoneNumber = phoneMatch[1];
     if (statusMatch) updatedForm.status = statusMatch[0].charAt(0).toUpperCase() + statusMatch[0].slice(1);
 
