@@ -32,7 +32,7 @@ const Order = () => {
     const option = elementOptions.find(item => item.key === key);
     return sum + (option?.price || 0);
   }, 0);
-  const totalCost = (parseFloat(form.baseCost) || 0) + selectedElementsCost;
+  const totalCost = (parseFloat(form.baseCost) || 0) + selectedElementsCost + (parseFloat(form.delivery_charge) || 0);
 
   const startListening = () => {
     if (!recognition) {
