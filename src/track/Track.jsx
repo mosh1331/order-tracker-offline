@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PouchDB from 'pouchdb';
 import * as XLSX from 'xlsx';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 const db = new PouchDB('tote_sales');
 
@@ -31,20 +33,35 @@ const Track = () => {
       .map(r => r.doc)
       .sort((a, b) => b.timestamp - a.timestamp);
     setOrders(docs);
+    checkDailySync();
   };
 
   const handleExport = () => {
     const ws = XLSX.utils.json_to_sheet(orders);
+    console.log('Exporting orders to Excel:', orders);
+    console.log('ws orders to Excel:', ws);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sales");
     XLSX.writeFile(wb, `LeuTote_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
+
+  dayjs.extend(customParseFormat);
+
   const getDaysSinceOrder = (orderDate) => {
-    const orderDateObj = new Date(orderDate);
-    const today = new Date();
-    const diffTime = today - orderDateObj;
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (!orderDate) return 0;
+
+    // 2. Explicitly tell dayjs the input format
+    const order = dayjs(orderDate, "DD/MM/YYYY");
+    const today = dayjs().startOf('day');
+
+    // Check if parsing failed
+    if (!order.isValid()) {
+      console.error("Invalid date format received:", orderDate);
+      return 0;
+    }
+
+    return today.diff(order.startOf('day'), 'day');
   };
 
   const filteredOrders = orders.filter(order => {
@@ -64,14 +81,21 @@ const Track = () => {
 
   useEffect(() => {
     refreshOrders();
-    checkDailySync();
+
   }, []);
 
   return (
     <main className="animate-in">
       <div style={{ padding: '0 20px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>Recent Sales</h2>
-        <button 
+        {/* <button
+          onClick={handleExport}
+          className="btn-primary"
+          style={{ padding: '8px 16px', fontSize: '0.9rem', cursor: 'pointer' }}
+        >
+          📥 Export Sales
+        </button> */}
+        <button
           onClick={() => setShowFilters(!showFilters)}
           className="badge badge-processing"
           style={{ border: 'none', cursor: 'pointer', padding: '8px 16px', fontSize: '0.9rem' }}
@@ -82,12 +106,12 @@ const Track = () => {
 
       {/* Filters Popover */}
       {showFilters && (
-        <div style={{ 
-          position: 'relative', 
-          margin: '0 20px 20px 20px', 
-          background: 'white', 
-          border: '1px solid #eee', 
-          borderRadius: '8px', 
+        <div style={{
+          position: 'relative',
+          margin: '0 20px 20px 20px',
+          background: 'white',
+          border: '1px solid #eee',
+          borderRadius: '8px',
           padding: '16px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           zIndex: 10
@@ -162,14 +186,14 @@ const Track = () => {
 
       {filteredOrders.map(order => {
         const daysSinceOrder = getDaysSinceOrder(order.date);
-        const isOldOrder = daysSinceOrder >= 2 && order.status == 'Processing';
-        
+        const isOldOrder = daysSinceOrder >= 4 && order.status == 'Processing';
+
         return (
-          <div 
-            key={order._id} 
-            className="order-card" 
-            onClick={() => navigate(`/order/${order._id}`)} 
-            style={{ 
+          <div
+            key={order._id}
+            className="order-card"
+            onClick={() => navigate(`/order/${order._id}`)}
+            style={{
               cursor: 'pointer',
               backgroundColor: isOldOrder ? '#fff3cd' : undefined,
               border: isOldOrder ? '1px solid #ffc107' : undefined,
@@ -192,20 +216,42 @@ const Track = () => {
                 ⚠️ {daysSinceOrder}d
               </div>
             )}
+
             <div className="order-header">
               <div>
-                <p className="customer-name" style={{ color: isOldOrder ? '#856404' : undefined }}>
+                <p className="customer-name" style={{ color: isOldOrder ? '#856404' : undefined, textTransform: 'capitalize' }}>
                   {order.customerName}
                 </p>
                 <p className="order-meta" style={{ color: isOldOrder ? '#856404' : undefined }}>
                   {order.date} • {order.source} • {daysSinceOrder} days ago
                 </p>
               </div>
-              <span className={`badge badge-${order.status.toLowerCase()}`}>{order.status}</span>
+
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                <span className={`badge badge-${order.status.toLowerCase()}`}>{order.status}</span>
+
+                {/* Ready to Ship Label */}
+                {order.status === "Completed" && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    fontSize: '0.65rem',
+                    color: 'var(--success)', // Or #28a745
+                    fontWeight: '600',
+                    textTransform: 'uppercase'
+                  }}>
+                    <span>📦</span> <span>Ready to ship</span>
+                  </div>
+                )}
+              </div>
             </div>
+
             <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontWeight: 700, color: isOldOrder ? '#856404' : undefined }}>₹{order.price}</span>
-              <span style={{ fontSize: '0.8rem', color: isOldOrder ? '#856404' : 'var(--success)' }}>Profit: ₹{order.price - order.cost}</span>
+              <span style={{ fontSize: '0.8rem', color: isOldOrder ? '#856404' : 'var(--success)' }}>
+                Profit: ₹{order.price - order.cost}
+              </span>
             </div>
           </div>
         );

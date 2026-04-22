@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PouchDB from 'pouchdb';
 import { bagOptions, pouchOptions } from '../helper/Data';
+import dayjs from 'dayjs';
+
+// This will be perfectly consistent on iOS Safari
 
 const db = new PouchDB('tote_sales');
 const defaultForm = {
@@ -15,7 +18,8 @@ const defaultForm = {
     source: 'Instagram',
     orderType: 'Bag',
     selectedElements: [],
-    notes: ''
+    notes: '',
+    paymentStatus: 'Pending',
 };
 
 // Initialize Speech Recognition
@@ -81,7 +85,8 @@ const Order = () => {
             cost: totalCost,
             _id: `order_${Date.now()}`,
             timestamp: Date.now(),
-            date: new Date().toLocaleDateString()
+            date: dayjs().format('DD/MM/YYYY')
+
         };
         await db.put(newOrder);
         setForm(defaultForm);

@@ -17,7 +17,7 @@ const OrderDetail = () => {
         const option = elementOptions.find(item => item.key === key);
         return sum + (option?.price || 0);
     }, 0);
-    const totalCost = (parseFloat(editForm.baseCost) || 0) + selectedElementsCost;
+    const totalCost = (parseFloat(editForm.baseCost) || 0) + selectedElementsCost + (parseFloat(editForm.delivery_charge) || 0);
 
     const loadOrder = async () => {
         try {
@@ -61,7 +61,7 @@ const OrderDetail = () => {
         loadOrder();
     }, [orderId]);
 
-    
+
 
     if (!order) {
         return (
@@ -113,15 +113,7 @@ const OrderDetail = () => {
                         </select>
                     </div>
 
-                    <div className="input-group">
-                        <label className="input-label">Base Cost (₹)</label>
-                        <input
-                            type="number"
-                            value={editForm.baseCost || ''}
-                            onChange={e => setEditForm({ ...editForm, baseCost: e.target.value })}
-                            required
-                        />
-                    </div>
+
 
                     <div className="input-group">
                         <label className="input-label">Order Elements</label>
@@ -164,6 +156,26 @@ const OrderDetail = () => {
                     </div>
 
                     <div className="input-group">
+                        <label className="input-label">Delivery Charge (₹)</label>
+                        <input
+                            type="number"
+                            value={editForm.delivery_charge || ''}
+                            onChange={e => setEditForm({ ...editForm, delivery_charge: e.target.value })}
+                            required
+                        />
+                    </div>
+
+                    <div className="input-group">
+                        <label className="input-label">Base Cost (₹)</label>
+                        <input
+                            type="number"
+                            value={editForm.baseCost || ''}
+                            onChange={e => setEditForm({ ...editForm, baseCost: e.target.value })}
+                            required
+                        />
+                    </div>
+
+                    <div className="input-group">
                         <label className="input-label">Total Cost (₹)</label>
                         <input type="number" value={totalCost} readOnly style={{ backgroundColor: '#f8f9fa' }} />
                     </div>
@@ -172,8 +184,17 @@ const OrderDetail = () => {
                         <label className="input-label">Status</label>
                         <select value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
                             <option value="Processing">Processing</option>
+                            <option value="Completed">Completed</option>
                             <option value="Shipped">Shipped</option>
                             <option value="Delivered">Delivered</option>
+                        </select>
+                    </div>
+                      <div className="input-group">
+                        <label className="input-label">Payment Status</label>
+                        <select value={editForm.paymentStatus} onChange={e => setEditForm({ ...editForm, paymentStatus: e.target.value })}>
+                            <option value="Pending">Pending</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Partial">Partial</option>
                         </select>
                     </div>
 
@@ -187,7 +208,7 @@ const OrderDetail = () => {
                     <div className="order-details">
                         <div style={{ marginBottom: '20px' }}>
                             <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Customer Name</p>
-                            <p style={{ fontSize: '1.1rem', fontWeight: 600 }}>{order.customerName}</p>
+                            <p style={{ fontSize: '1.1rem', fontWeight: 600,textTransform:'capitalize' }}>{order.customerName}</p>
                         </div>
 
                         <div style={{ marginBottom: '20px' }}>
@@ -226,6 +247,10 @@ const OrderDetail = () => {
                             <div>
                                 <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Status</p>
                                 <span className={`badge badge-${order.status.toLowerCase()}`}>{order.status}</span>
+                            </div>
+                              <div>
+                                <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Payment</p>
+                                <span className={`badge badge-${order.paymentStatus.toLowerCase()}`}>{order.paymentStatus}</span>
                             </div>
                         </div>
 
