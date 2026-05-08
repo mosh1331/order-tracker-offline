@@ -20,7 +20,7 @@ body {
 
 /* Layout Containers */
 .app-container {
-  max-width: 500px; /* Standard mobile width */
+  max-width: 1400px; /* Standard mobile width */
   margin: 0 auto;
   padding-bottom: 80px; /* Space for nav */
 }
