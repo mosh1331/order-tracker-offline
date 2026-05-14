@@ -33,15 +33,38 @@ const OrderDetail = () => {
         }
     };
 
+    // const handleSaveChanges = async (e) => {
+    //     e.preventDefault();
+    //     try {
+    //         await db.put({
+    //             ...editForm,
+    //             cost: totalCost,
+    //             _rev: order._rev
+    //         });
+    //         setOrder({ ...editForm, cost: totalCost });
+    //         setIsEditing(false);
+    //     } catch (e) {
+    //         console.error('Error saving order', e);
+    //     }
+    // };
+
     const handleSaveChanges = async (e) => {
         e.preventDefault();
         try {
+            // HELPER: Convert HTML date (YYYY-MM-DD) to (DD/MM/YYYY) if changed
+            let finalDate = editForm.date;
+            if (finalDate.includes('-')) {
+                const [y, m, d] = finalDate.split('-');
+                finalDate = `${d}/${m}/${yearStr || y}`; // Ensures DD/MM/YYYY
+            }
+
             await db.put({
                 ...editForm,
+                date: finalDate, // Updated date format
                 cost: totalCost,
                 _rev: order._rev
             });
-            setOrder({ ...editForm, cost: totalCost });
+            setOrder({ ...editForm, date: finalDate, cost: totalCost });
             setIsEditing(false);
         } catch (e) {
             console.error('Error saving order', e);
@@ -189,7 +212,7 @@ const OrderDetail = () => {
                             <option value="Delivered">Delivered</option>
                         </select>
                     </div>
-                      <div className="input-group">
+                    <div className="input-group">
                         <label className="input-label">Payment Status</label>
                         <select value={editForm.paymentStatus} onChange={e => setEditForm({ ...editForm, paymentStatus: e.target.value })}>
                             <option value="Pending">Pending</option>
@@ -197,6 +220,25 @@ const OrderDetail = () => {
                             <option value="Partial">Partial</option>
                         </select>
                     </div>
+                    <div className="input-group">
+                        <label className="input-label">Order Date</label>
+                        <input
+                            type="date"
+                            // Converts DD/MM/YYYY back to YYYY-MM-DD for the input to display correctly
+                            value={editForm.date?.includes('/')
+                                ? editForm.date.split('/').reverse().join('-')
+                                : editForm.date || ''}
+                            onChange={e => {
+                                const rawDate = e.target.value; // YYYY-MM-DD
+                                const [y, m, d] = rawDate.split('-');
+                                setEditForm({ ...editForm, date: `${d}/${m}/${y}` });
+                            }}
+                        />
+                        <small style={{ color: '#666', marginTop: '4px', display: 'block' }}>
+                            Format: DD/MM/YYYY (Current: {editForm.date})
+                        </small>
+                    </div>
+
 
                     <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                         <button type="submit" className="btn-primary" style={{ flex: 1 }}>Save Changes</button>
@@ -208,7 +250,7 @@ const OrderDetail = () => {
                     <div className="order-details">
                         <div style={{ marginBottom: '20px' }}>
                             <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Customer Name</p>
-                            <p style={{ fontSize: '1.1rem', fontWeight: 600,textTransform:'capitalize' }}>{order.customerName}</p>
+                            <p style={{ fontSize: '1.1rem', fontWeight: 600, textTransform: 'capitalize' }}>{order.customerName}</p>
                         </div>
 
                         <div style={{ marginBottom: '20px' }}>
@@ -248,7 +290,7 @@ const OrderDetail = () => {
                                 <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Status</p>
                                 <span className={`badge badge-${order.status.toLowerCase()}`}>{order.status}</span>
                             </div>
-                              <div>
+                            <div>
                                 <p style={{ color: '#666', fontSize: '0.9rem', marginBottom: '4px' }}>Payment</p>
                                 <span className={`badge badge-${order.paymentStatus.toLowerCase()}`}>{order.paymentStatus}</span>
                             </div>
