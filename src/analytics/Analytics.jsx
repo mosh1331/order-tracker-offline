@@ -41,8 +41,9 @@ const Analytics = () => {
       let projectedProfit = 0;
 
       orders.forEach(order => {
-        const orderDate = new Date(order.date);
-        const monthKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
+        const [dayStr, monthStr, yearStr] = order.date.split('/');
+        const monthKey = `${yearStr}-${monthStr.padStart(2, '0')}`;
+        console.log(monthKey, 'monthKey');
 
         if (!monthlyData[monthKey]) {
           monthlyData[monthKey] = {
