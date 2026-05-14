@@ -150,6 +150,13 @@ const Track = () => {
               >
                 Shipped ({orders.filter(o => o.status === 'Shipped').length})
               </button>
+               <button
+                onClick={() => setStatusFilter('completed')}
+                className={`badge ${statusFilter === 'completed' ? 'badge-shipped' : 'badge-delivered'}`}
+                style={{ border: 'none', cursor: 'pointer', padding: '4px 10px', fontSize: '0.8rem' }}
+              >
+                Completed ({orders.filter(o => o.status === 'Completed').length})
+              </button>
               <button
                 onClick={() => setStatusFilter('delivered')}
                 className={`badge ${statusFilter === 'delivered' ? 'badge-shipped' : 'badge-delivered'}`}
