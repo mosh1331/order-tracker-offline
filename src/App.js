@@ -6,31 +6,34 @@ import Order from './order/Order';
 import OrderDetail from './order/OrderDetail';
 import Track from './track/Track';
 import Analytics from './analytics/Analytics';
+import { useEffect } from 'react';
 
 function Navigation() {
   const location = useLocation();
   if (location.pathname === '/' || location.pathname.startsWith('/order/'))
-  if (location.pathname === '/') {
-    return null;
-  }
+    if (location.pathname === '/') {
+      return null;
+    }
+
+
 
   return (
     <nav className="nav-bar">
       <Link to="/new-order" style={{ textDecoration: 'none' }}>
         <button className={`nav-item ${location.pathname === '/new-order' ? 'active' : ''}`}>
-          <span style={{fontSize: '1.2rem'}}>⊕</span>
+          <span style={{ fontSize: '1.2rem' }}>⊕</span>
           <span>New Order</span>
         </button>
       </Link>
       <Link to="/track" style={{ textDecoration: 'none' }}>
         <button className={`nav-item ${location.pathname === '/track' ? 'active' : ''}`}>
-          <span style={{fontSize: '1.2rem'}}>☵</span>
+          <span style={{ fontSize: '1.2rem' }}>☵</span>
           <span>Track</span>
         </button>
       </Link>
       <Link to="/analytics" style={{ textDecoration: 'none' }}>
         <button className={`nav-item ${location.pathname === '/analytics' ? 'active' : ''}`}>
-          <span style={{fontSize: '1.2rem'}}>📊</span>
+          <span style={{ fontSize: '1.2rem' }}>📊</span>
           <span>Analytics</span>
         </button>
       </Link>
@@ -40,7 +43,7 @@ function Navigation() {
 
 function PageWrapper({ children }) {
   return (
-    <div className="app-container" style={{paddingBottom: '80px'}}>
+    <div className="app-container" style={{ paddingBottom: '80px' }}>
       <header className="header">
         <h1>LEU TOTE</h1>
       </header>
@@ -50,6 +53,15 @@ function PageWrapper({ children }) {
 }
 
 function App() {
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          registration.update(); // Forces the worker to check Vercel for new code
+        }
+      });
+    }
+  }, []);
   return (
     <Router>
       <div className="App">
