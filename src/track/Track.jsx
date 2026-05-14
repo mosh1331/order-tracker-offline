@@ -65,25 +65,24 @@ const Track = () => {
     return today.diff(order.startOf('day'), 'day');
   };
 
- const filteredOrders = orders.filter(order => {
-  // Status filter
-  const statusMatch = statusFilter === 'all' || order.status.toLowerCase() === statusFilter.toLowerCase();
-console.log(paymentFilter,'paymentFilter')
-  // Payment filter
-  // We check for 'all' first, otherwise compare the database value with the filter state
-  const paymentMatch = paymentFilter === 'all' || (order.paymentStatus && order.paymentStatus == paymentFilter);
+  const filteredOrders = orders.filter(order => {
+    // Status filter
+    const statusMatch = statusFilter === 'all' || order.status.toLowerCase() === statusFilter.toLowerCase();
+    // Payment filter
+    // We check for 'all' first, otherwise compare the database value with the filter state
+    const paymentMatch = paymentFilter === 'all' || (order.paymentStatus && order.paymentStatus == paymentFilter);
 
-  // Time filter
-  let timeMatch = true;
-  if (timeFilter === '2days') {
-    timeMatch = getDaysSinceOrder(order.date) > 2;
-  } else if (timeFilter === '4days') {
-    timeMatch = getDaysSinceOrder(order.date) > 4;
-  }
+    // Time filter
+    let timeMatch = true;
+    if (timeFilter === '2days') {
+      timeMatch = getDaysSinceOrder(order.date) > 2;
+    } else if (timeFilter === '4days') {
+      timeMatch = getDaysSinceOrder(order.date) > 4;
+    }
 
-  // Only return true if all three conditions are met
-  return statusMatch && paymentMatch && timeMatch;
-});
+    // Only return true if all three conditions are met
+    return statusMatch && paymentMatch && timeMatch;
+  });
 
   useEffect(() => {
     refreshOrders();
@@ -239,63 +238,123 @@ console.log(paymentFilter,'paymentFilter')
               onClick={() => navigate(`/order/${order._id}`)}
               style={{
                 cursor: 'pointer',
-                backgroundColor: isOldOrder ? '#fff3cd' : undefined,
-                border: isOldOrder ? '1px solid #ffc107' : undefined,
-                position: 'relative'
+                backgroundColor: isOldOrder ? '#fff9e6' : '#fff', // Slightly softer yellow
+                border: isOldOrder ? '1px solid #ffeeba' : '1px solid #edf2f7',
+                position: 'relative',
+                padding: '16px',
+                borderRadius: '12px',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.04)'
               }}
             >
               {isOldOrder && (
                 <div style={{
                   position: 'absolute',
-                  top: '8px',
-                  right: '8px',
+                  top: '-10px',
+                  right: '12px',
                   backgroundColor: '#dc3545',
                   color: 'white',
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  fontSize: '0.7rem',
+                  padding: '2px 8px',
+                  borderRadius: '20px',
+                  fontSize: '0.65rem',
                   fontWeight: 'bold',
+                  boxShadow: '0 2px 4px rgba(220, 53, 69, 0.3)',
                   zIndex: 1
                 }}>
-                  ⚠️ {daysSinceOrder}d
+                  DELAYED {daysSinceOrder}d
                 </div>
               )}
 
-              <div className="order-header">
-                <div>
-                  <p className="customer-name" style={{ color: isOldOrder ? '#856404' : undefined, textTransform: 'capitalize' }}>
+              <div className="order-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                  <p className="customer-name" style={{
+                    margin: 0,
+                    fontSize: '1.1rem',
+                    fontWeight: '700',
+                    color: isOldOrder ? '#856404' : '#2d3748',
+                    textTransform: 'capitalize'
+                  }}>
                     {order.customerName}
                   </p>
-                  <p className="order-meta" style={{ color: isOldOrder ? '#856404' : undefined }}>
+                  <p className="order-meta" style={{
+                    margin: '4px 0 0 0',
+                    fontSize: '0.8rem',
+                    color: isOldOrder ? '#997404' : '#718096'
+                  }}>
                     {order.date} • {order.source} • {daysSinceOrder} days ago
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                  <span className={`badge badge-${order.status.toLowerCase()}`}>{order.status}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                  {/* Primary Status Badge */}
+                  <span className={`badge badge-${order.status.toLowerCase()}`} style={{ fontSize: '0.7rem' }}>
+                    {order.status}
+                  </span>
 
-                  {/* Ready to Ship Label */}
-                  {order.status === "Completed" && (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '3px',
-                      fontSize: '0.65rem',
-                      color: 'var(--success)', // Or #28a745
-                      fontWeight: '600',
-                      textTransform: 'uppercase'
-                    }}>
-                      <span>📦</span> <span>Ready to ship</span>
-                    </div>
-                  )}
+                  {/* Payment Status Chip - The Beautiful Part */}
+                  <span style={{
+                    fontSize: '0.65rem',
+                    fontWeight: '700',
+                    padding: '3px 8px',
+                    borderRadius: '6px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.02em',
+                    backgroundColor:
+                      order.paymentStatus === 'Paid' ? '#e6fffa' :
+                        order.paymentStatus === 'Partial' ? '#fffaf0' : '#fff5f5',
+                    color:
+                      order.paymentStatus === 'Paid' ? '#2c7a7b' :
+                        order.paymentStatus === 'Partial' ? '#b7791f' : '#e53e3e',
+                    border: `1px solid ${order.paymentStatus === 'Paid' ? '#b2f5ea' :
+                        order.paymentStatus === 'Partial' ? '#fbe3a1' : '#feb2b2'
+                      }`
+                  }}>
+                    ₹{order.paymentStatus || 'Pending'}
+                  </span>
                 </div>
               </div>
 
-              <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 700, color: isOldOrder ? '#856404' : undefined }}>₹{order.price}</span>
-                <span style={{ fontSize: '0.8rem', color: isOldOrder ? '#856404' : 'var(--success)' }}>
-                  Profit: ₹{order.price - order.cost}
-                </span>
+              {/* Ready to Ship indicator positioned more subtly */}
+              {order.status === "Completed" && (
+                <div style={{
+                  marginTop: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.7rem',
+                  color: '#38a169',
+                  fontWeight: '600'
+                }}>
+                  <span role="img" aria-label="package">📦</span> Ready to ship
+                </div>
+              )}
+
+              <div style={{
+                marginTop: '16px',
+                paddingTop: '12px',
+                borderTop: '1px solid #f7fafc',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#a0aec0', textTransform: 'uppercase', fontWeight: 'bold' }}>Revenue</span>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color: isOldOrder ? '#856404' : '#1a202c' }}>₹{order.price}</span>
+                </div>
+
+                <div style={{ textAlign: 'right' }}>
+                  <span style={{
+                    display: 'block',
+                    fontSize: '0.85rem',
+                    fontWeight: '600',
+                    color: isOldOrder ? '#856404' : '#38a169',
+                    backgroundColor: isOldOrder ? 'transparent' : '#f0fff4',
+                    padding: '2px 6px',
+                    borderRadius: '4px'
+                  }}>
+                    Profit: ₹{order.price - order.cost}
+                  </span>
+                </div>
               </div>
             </div>
           );
