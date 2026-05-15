@@ -4,6 +4,8 @@ import PouchDB from 'pouchdb';
 import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import OrderSync from '../order/OrderSync';
+import SyncFromCloud from '../order/SyncFromCloud';
 
 const db = new PouchDB('tote_sales');
 
@@ -103,6 +105,7 @@ const Track = () => {
         >
           📥 Export Sales
         </button> */}
+ 
         <button
           onClick={() => setShowFilters(!showFilters)}
           className="badge badge-processing"

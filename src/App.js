@@ -7,6 +7,7 @@ import OrderDetail from './order/OrderDetail';
 import Track from './track/Track';
 import Analytics from './analytics/Analytics';
 import { useEffect } from 'react';
+import Settings from './settings/Settings';
 
 function Navigation() {
   const location = useLocation();
@@ -35,6 +36,12 @@ function Navigation() {
         <button className={`nav-item ${location.pathname === '/analytics' ? 'active' : ''}`}>
           <span style={{ fontSize: '1.2rem' }}>📊</span>
           <span>Analytics</span>
+        </button>
+      </Link>
+       <Link to="/settings" style={{ textDecoration: 'none' }}>
+        <button className={`nav-item ${location.pathname === '/settings' ? 'active' : ''}`}>
+          <span style={{ fontSize: '1.2rem' }}>⚙️</span>
+          <span>Settings</span>
         </button>
       </Link>
     </nav>
@@ -70,6 +77,7 @@ function App() {
           <Route path="/new-order" element={<PageWrapper><Order /></PageWrapper>} />
           <Route path="/track" element={<PageWrapper><Track /></PageWrapper>} />
           <Route path="/analytics" element={<PageWrapper><Analytics /></PageWrapper>} />
+          <Route path="/settings" element={<PageWrapper><Settings /></PageWrapper>} />
           <Route path="/order/:orderId" element={<PageWrapper><OrderDetail /></PageWrapper>} />
         </Routes>
         <Navigation />
